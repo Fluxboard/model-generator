@@ -17,7 +17,7 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * @var string
      */
-    protected $schema;
+    protected $database_name;
 
     /**
      * @var \Illuminate\Database\PostgresConnection
@@ -37,21 +37,21 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * @var mixed|null
      */
-    protected $schema_database = null;
+    protected $default_schema = null;
 
     /**
      * Mapper constructor.
      *
-     * @param string $schema
+     * @param string $database_name
      * @param \Illuminate\Database\PostgresConnection $connection
      */
-    public function __construct($schema, $connection)
+    public function __construct($database_name, $connection)
     {
-        $this->schema_database = Config::get("database.connections.pgsql.schema");
-        if (!$this->schema_database){
-            $this->schema_database = 'public';
+        $this->default_schema = Config::get("database.connections.pgsql.schema");
+        if (!$this->default_schema) {
+            $this->default_schema = 'public';
         }
-        $this->schema = $schema;
+        $this->database_name = $database_name;
         $this->connection = $connection;
 
         $this->load();
@@ -73,10 +73,10 @@ class Schema implements \Reliese\Meta\Schema
     {
         // Note that "schema" refers to the database name,
         // not a pgsql schema.
-        $this->connection->raw('\c '.$this->wrap($this->schema));
-        $tables = $this->fetchTables($this->schema);
+        $this->connection->raw('\c ' . $this->wrap($this->database_name));
+        $tables = $this->fetchTables($this->database_name);
         foreach ($tables as $table) {
-            $blueprint = new Blueprint($this->connection->getName(), $this->schema, $table);
+            $blueprint = new Blueprint($this->connection->getName(), $this->database_name, $table);
             $this->fillColumns($blueprint);
             $this->fillConstraints($blueprint);
             $this->tables[$table] = $blueprint;
@@ -92,7 +92,7 @@ class Schema implements \Reliese\Meta\Schema
     protected function fetchTables()
     {
         $rows = $this->arraify($this->connection->select(
-            "SELECT * FROM pg_tables where schemaname='$this->schema_database'"
+            "SELECT * FROM pg_tables where schemaname='$this->default_schema'"
         ));
         $names = array_column($rows, 'tablename');
 
@@ -105,9 +105,9 @@ class Schema implements \Reliese\Meta\Schema
     protected function fillColumns(Blueprint $blueprint)
     {
         $rows = $this->arraify($this->connection->select(
-            'SELECT * FROM information_schema.columns '.
-            "WHERE table_schema='$this->schema_database'".
-            'AND table_name='.$this->wrap($blueprint->table())
+            'SELECT * FROM information_schema.columns ' .
+                "WHERE table_schema='$this->default_schema'" .
+                'AND table_name=' . $this->wrap($blueprint->table())
         ));
         foreach ($rows as $column) {
             $blueprint->withColumn(
@@ -143,7 +143,7 @@ class Schema implements \Reliese\Meta\Schema
                 AND parent.attrelid = p.confrelid
             LEFT JOIN pg_class parent_class on parent_class.oid = p.confrelid
         WHERE child_class.relkind = \'r\'::char
-            AND child_class.relname = \''.$blueprint->table().'\'
+            AND child_class.relname = \'' . $blueprint->table() . '\'
             AND child.attnum > 0
             AND contype IS NOT NULL
         ORDER BY child.attnum
@@ -153,7 +153,7 @@ class Schema implements \Reliese\Meta\Schema
         $this->fillPrimaryKey($relations, $blueprint);
         $this->fillRelations($relations, $blueprint);
 
-        $sql = 'SELECT * FROM pg_indexes WHERE tablename = \''.$blueprint->table().'\';';
+        $sql = 'SELECT * FROM pg_indexes WHERE tablename = \'' . $blueprint->table() . '\';';
         $indexes = $this->arraify($this->connection->select($sql));
         $this->fillIndexes($indexes, $blueprint);
     }
@@ -243,7 +243,7 @@ class Schema implements \Reliese\Meta\Schema
                 'index' => '',
                 'columns' => $row['columns'],
                 'references' => $row['ref'],
-                'on' => [$this->schema, $row['table']],
+                'on' => [$this->database_name, $row['table']],
             ];
 
             $blueprint->withRelation(new Fluent($relation));
@@ -298,7 +298,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     public function schema()
     {
-        return $this->schema;
+        return $this->database_name;
     }
 
     /**
@@ -327,7 +327,7 @@ class Schema implements \Reliese\Meta\Schema
     public function table($table)
     {
         if (! $this->has($table)) {
-            throw new \InvalidArgumentException("Table [$table] does not belong to schema [{$this->schema}]");
+            throw new \InvalidArgumentException("Table [$table] does not belong to schema [{$this->database_name}]");
         }
 
         return $this->tables[$table];

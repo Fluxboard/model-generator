@@ -15,7 +15,7 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * @var string
      */
-    protected $schema;
+    protected $database_name;
 
     /**
      * @var \Illuminate\Database\SQLiteConnection
@@ -35,12 +35,12 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * Mapper constructor.
      *
-     * @param string $schema
+     * @param string $database_name
      * @param \Illuminate\Database\MySqlConnection $connection
      */
-    public function __construct($schema, $connection)
+    public function __construct($database_name, $connection)
     {
-        $this->schema = $schema;
+        $this->database_name = $database_name;
         $this->connection = $connection;
         /* Sqlite has a bool type that doctrine isn't registering */
         $this->connection->getDoctrineConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('bool', 'boolean');
@@ -64,7 +64,7 @@ class Schema implements \Reliese\Meta\Schema
         $tables = $this->fetchTables();
 
         foreach ($tables as $table) {
-            $blueprint = new Blueprint($this->connection->getName(), $this->schema, $table);
+            $blueprint = new Blueprint($this->connection->getName(), $this->database_name, $table);
             $this->fillColumns($blueprint);
             $this->fillConstraints($blueprint);
             $this->tables[$table] = $blueprint;
@@ -144,7 +144,7 @@ class Schema implements \Reliese\Meta\Schema
         $key = [
             'name' => 'primary',
             'index' => '',
-            'columns' => optional($indexes['primary']??null)->getColumns()?:[],
+            'columns' => optional($indexes['primary'] ?? null)->getColumns() ?: [],
         ];
 
         $blueprint->withPrimaryKey(new Fluent($key));
@@ -178,7 +178,7 @@ class Schema implements \Reliese\Meta\Schema
         $relations = $this->manager()->listTableForeignKeys($blueprint->table());
 
         foreach ($relations as $setup) {
-            $table = ['database' => '', 'table'=>$setup->getForeignTableName()];
+            $table = ['database' => '', 'table' => $setup->getForeignTableName()];
 
             $relation = [
                 'name' => 'foreign',
@@ -207,7 +207,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     public function schema()
     {
-        return $this->schema;
+        return $this->database_name;
     }
 
     /**
@@ -236,7 +236,7 @@ class Schema implements \Reliese\Meta\Schema
     public function table($table)
     {
         if (! $this->has($table)) {
-            throw new \InvalidArgumentException("Table [$table] does not belong to schema [{$this->schema}]");
+            throw new \InvalidArgumentException("Table [$table] does not belong to schema [{$this->database_name}]");
         }
 
         return $this->tables[$table];

@@ -16,7 +16,7 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * @var string
      */
-    protected $schema;
+    protected $database_name;
 
     /**
      * @var \Illuminate\Database\MySqlConnection
@@ -36,12 +36,12 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * Mapper constructor.
      *
-     * @param string $schema
+     * @param string $database_name
      * @param \Illuminate\Database\MySqlConnection $connection
      */
-    public function __construct($schema, $connection)
+    public function __construct($database_name, $connection)
     {
-        $this->schema = $schema;
+        $this->database_name = $database_name;
         $this->connection = $connection;
 
         $this->load();
@@ -61,11 +61,11 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function load()
     {
-        $tables = $this->fetchTables($this->schema);
+        $tables = $this->fetchTables($this->database_name);
         foreach ($tables as $table) {
             $this->loadTable($table);
         }
-        $views = $this->fetchViews($this->schema);
+        $views = $this->fetchViews($this->database_name);
         foreach ($views as $table) {
             $this->loadTable($table, true);
         }
@@ -78,8 +78,8 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function fetchTables($schema)
     {
-        $rows = $this->arraify($this->connection->select('SHOW FULL TABLES FROM '.$this->wrap($schema).' WHERE Table_type="BASE TABLE"'));
-        $names = array_column($rows, 'Tables_in_'.$schema);
+        $rows = $this->arraify($this->connection->select('SHOW FULL TABLES FROM ' . $this->wrap($schema) . ' WHERE Table_type="BASE TABLE"'));
+        $names = array_column($rows, 'Tables_in_' . $schema);
 
         return Arr::flatten($names);
     }
@@ -91,8 +91,8 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function fetchViews($schema)
     {
-        $rows = $this->arraify($this->connection->select('SHOW FULL TABLES FROM '.$this->wrap($schema).' WHERE Table_type="VIEW"'));
-        $names = array_column($rows, 'Tables_in_'.$schema);
+        $rows = $this->arraify($this->connection->select('SHOW FULL TABLES FROM ' . $this->wrap($schema) . ' WHERE Table_type="VIEW"'));
+        $names = array_column($rows, 'Tables_in_' . $schema);
 
         return Arr::flatten($names);
     }
@@ -102,7 +102,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function fillColumns(Blueprint $blueprint)
     {
-        $rows = $this->arraify($this->connection->select('SHOW FULL COLUMNS FROM '.$this->wrap($blueprint->qualifiedTable())));
+        $rows = $this->arraify($this->connection->select('SHOW FULL COLUMNS FROM ' . $this->wrap($blueprint->qualifiedTable())));
         foreach ($rows as $column) {
             $blueprint->withColumn(
                 $this->parseColumn($column)
@@ -125,7 +125,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function fillConstraints(Blueprint $blueprint)
     {
-        $row = $this->arraify($this->connection->select('SHOW CREATE TABLE '.$this->wrap($blueprint->qualifiedTable())));
+        $row = $this->arraify($this->connection->select('SHOW CREATE TABLE ' . $this->wrap($blueprint->qualifiedTable())));
         $row = array_change_key_case($row[0]);
         $sql = ($blueprint->isView() ? $row['create view'] : $row['create table']);
         $sql = str_replace('`', '', $sql);
@@ -285,7 +285,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     public function schema()
     {
-        return $this->schema;
+        return $this->database_name;
     }
 
     /**
@@ -314,7 +314,7 @@ class Schema implements \Reliese\Meta\Schema
     public function table($table)
     {
         if (! $this->has($table)) {
-            throw new \InvalidArgumentException("Table [$table] does not belong to schema [{$this->schema}]");
+            throw new \InvalidArgumentException("Table [$table] does not belong to schema [{$this->database_name}]");
         }
 
         return $this->tables[$table];
@@ -355,7 +355,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function loadTable($table, $isView = false)
     {
-        $blueprint = new Blueprint($this->connection->getName(), $this->schema, $table, $isView);
+        $blueprint = new Blueprint($this->connection->getName(), $this->database_name, $table, $isView);
         $this->fillColumns($blueprint);
         $this->fillConstraints($blueprint);
         $this->tables[$table] = $blueprint;
