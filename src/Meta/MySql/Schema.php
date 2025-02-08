@@ -2,10 +2,10 @@
 
 namespace Reliese\Meta\MySql;
 
-use Illuminate\Support\Arr;
-use Reliese\Meta\Blueprint;
-use Illuminate\Support\Fluent;
 use Illuminate\Database\Connection;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Fluent;
+use Reliese\Meta\Blueprint;
 
 /**
  * Created by Cristian.
@@ -36,8 +36,8 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * Mapper constructor.
      *
-     * @param string $database_name
-     * @param \Illuminate\Database\MySqlConnection $connection
+     * @param  string  $database_name
+     * @param  \Illuminate\Database\MySqlConnection  $connection
      */
     public function __construct($database_name, $connection)
     {
@@ -49,6 +49,7 @@ class Schema implements \Reliese\Meta\Schema
 
     /**
      * @return \Doctrine\DBAL\Schema\AbstractSchemaManager
+     *
      * @todo: Use Doctrine instead of raw database queries
      */
     public function manager()
@@ -72,47 +73,56 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $schema
-     *
+     * @param  string  $schema
      * @return array
      */
     protected function fetchTables($schema)
     {
-        $rows = $this->arraify($this->connection->select('SHOW FULL TABLES FROM ' . $this->wrap($schema) . ' WHERE Table_type="BASE TABLE"'));
-        $names = array_column($rows, 'Tables_in_' . $schema);
+        $rows = $this->arraify(
+            $this->connection->select(
+                'SHOW FULL TABLES FROM '.
+                    $this->wrap($schema).
+                    ' WHERE Table_type="BASE TABLE"'
+            )
+        );
+        $names = array_column($rows, 'Tables_in_'.$schema);
 
         return Arr::flatten($names);
     }
 
     /**
-     * @param string $schema
-     *
+     * @param  string  $schema
      * @return array
      */
     protected function fetchViews($schema)
     {
-        $rows = $this->arraify($this->connection->select('SHOW FULL TABLES FROM ' . $this->wrap($schema) . ' WHERE Table_type="VIEW"'));
-        $names = array_column($rows, 'Tables_in_' . $schema);
+        $rows = $this->arraify(
+            $this->connection->select(
+                'SHOW FULL TABLES FROM '.
+                    $this->wrap($schema).
+                    ' WHERE Table_type="VIEW"'
+            )
+        );
+        $names = array_column($rows, 'Tables_in_'.$schema);
 
         return Arr::flatten($names);
     }
 
-    /**
-     * @param \Reliese\Meta\Blueprint $blueprint
-     */
     protected function fillColumns(Blueprint $blueprint)
     {
-        $rows = $this->arraify($this->connection->select('SHOW FULL COLUMNS FROM ' . $this->wrap($blueprint->qualifiedTable())));
+        $rows = $this->arraify(
+            $this->connection->select(
+                'SHOW FULL COLUMNS FROM '.
+                    $this->wrap($blueprint->qualifiedTable())
+            )
+        );
         foreach ($rows as $column) {
-            $blueprint->withColumn(
-                $this->parseColumn($column)
-            );
+            $blueprint->withColumn($this->parseColumn($column));
         }
     }
 
     /**
-     * @param array $metadata
-     *
+     * @param  array  $metadata
      * @return \Illuminate\Support\Fluent
      */
     protected function parseColumn($metadata)
@@ -120,14 +130,17 @@ class Schema implements \Reliese\Meta\Schema
         return (new Column($metadata))->normalize();
     }
 
-    /**
-     * @param \Reliese\Meta\Blueprint $blueprint
-     */
     protected function fillConstraints(Blueprint $blueprint)
     {
-        $row = $this->arraify($this->connection->select('SHOW CREATE TABLE ' . $this->wrap($blueprint->qualifiedTable())));
+        $row = $this->arraify(
+            $this->connection->select(
+                'SHOW CREATE TABLE '.$this->wrap($blueprint->qualifiedTable())
+            )
+        );
         $row = array_change_key_case($row[0]);
-        $sql = ($blueprint->isView() ? $row['create view'] : $row['create table']);
+        $sql = $blueprint->isView()
+            ? $row['create view']
+            : $row['create table'];
         $sql = str_replace('`', '', $sql);
 
         $this->fillPrimaryKey($sql, $blueprint);
@@ -139,7 +152,6 @@ class Schema implements \Reliese\Meta\Schema
      * Quick little hack since it is no longer possible to set PDO's fetch mode
      * to PDO::FETCH_ASSOC.
      *
-     * @param $data
      * @return mixed
      */
     protected function arraify($data)
@@ -148,13 +160,13 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $sql
-     * @param \Reliese\Meta\Blueprint $blueprint
+     * @param  string  $sql
+     *
      * @todo: Support named primary keys
      */
     protected function fillPrimaryKey($sql, Blueprint $blueprint)
     {
-        $pattern = '/\s*(PRIMARY KEY)\s+\(([^\)]+)\)/mi';
+        $pattern = "/\s*(PRIMARY KEY)\s+\(([^\)]+)\)/mi";
         if (preg_match_all($pattern, $sql, $indexes, PREG_SET_ORDER) == false) {
             return;
         }
@@ -169,12 +181,11 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $sql
-     * @param \Reliese\Meta\Blueprint $blueprint
+     * @param  string  $sql
      */
     protected function fillIndexes($sql, Blueprint $blueprint)
     {
-        $pattern = '/\s*(UNIQUE)?\s*(KEY|INDEX)\s+(\w+)\s+\(([^\)]+)\)/mi';
+        $pattern = "/\s*(UNIQUE)?\s*(KEY|INDEX)\s+(\w+)\s+\(([^\)]+)\)/mi";
         if (preg_match_all($pattern, $sql, $indexes, PREG_SET_ORDER) == false) {
             return;
         }
@@ -190,13 +201,14 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $sql
-     * @param \Reliese\Meta\Blueprint $blueprint
+     * @param  string  $sql
+     *
      * @todo: Support named foreign keys
      */
     protected function fillRelations($sql, Blueprint $blueprint)
     {
-        $pattern = '/FOREIGN KEY\s+\(([^\)]+)\)\s+REFERENCES\s+([^\(^\s]+)\s*\(([^\)]+)\)/mi';
+        $pattern =
+            "/FOREIGN KEY\s+\(([^\)]+)\)\s+REFERENCES\s+([^\(^\s]+)\s*\(([^\)]+)\)/mi";
         preg_match_all($pattern, $sql, $relations, PREG_SET_ORDER);
 
         foreach ($relations as $setup) {
@@ -215,8 +227,7 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $columns
-     *
+     * @param  string  $columns
      * @return array
      */
     protected function columnize($columns)
@@ -227,23 +238,23 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * Wrap within backticks.
      *
-     * @param string $table
-     *
+     * @param  string  $table
      * @return string
      */
     protected function wrap($table)
     {
         $pieces = explode('.', str_replace('`', '', $table));
 
-        return implode('.', array_map(function ($piece) {
-            return "`$piece`";
-        }, $pieces));
+        return implode(
+            '.',
+            array_map(function ($piece) {
+                return "`$piece`";
+            }, $pieces)
+        );
     }
 
     /**
-     * @param string $table
-     * @param \Reliese\Meta\Blueprint $blueprint
-     *
+     * @param  string  $table
      * @return array
      */
     protected function resolveForeignTable($table, Blueprint $blueprint)
@@ -264,14 +275,15 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param \Illuminate\Database\Connection $connection
-     *
      * @return array
      */
     public static function schemas(Connection $connection)
     {
-        $schemas = $connection->select('SELECT schema_name FROM information_schema.schemata');
+        $schemas = $connection->select(
+            'SELECT schema_name FROM information_schema.schemata'
+        );
         $schemas = array_column($schemas, 'schema_name');
+
         return array_diff($schemas, [
             'information_schema',
             'sys',
@@ -289,8 +301,7 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $table
-     *
+     * @param  string  $table
      * @return bool
      */
     public function has($table)
@@ -307,14 +318,15 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $table
-     *
+     * @param  string  $table
      * @return \Reliese\Meta\Blueprint
      */
     public function table($table)
     {
         if (! $this->has($table)) {
-            throw new \InvalidArgumentException("Table [$table] does not belong to schema [{$this->database_name}]");
+            throw new \InvalidArgumentException(
+                "Table [$table] does not belong to schema [{$this->database_name}]"
+            );
         }
 
         return $this->tables[$table];
@@ -329,8 +341,6 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param \Reliese\Meta\Blueprint $table
-     *
      * @return array
      */
     public function referencing(Blueprint $table)
@@ -350,12 +360,17 @@ class Schema implements \Reliese\Meta\Schema
     }
 
     /**
-     * @param string $table
-     * @param bool $isView
+     * @param  string  $table
+     * @param  bool  $isView
      */
     protected function loadTable($table, $isView = false)
     {
-        $blueprint = new Blueprint($this->connection->getName(), $this->database_name, $table, $isView);
+        $blueprint = new Blueprint(
+            $this->connection->getName(),
+            $this->database_name,
+            $table,
+            $isView
+        );
         $this->fillColumns($blueprint);
         $this->fillConstraints($blueprint);
         $this->tables[$table] = $blueprint;

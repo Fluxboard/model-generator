@@ -20,19 +20,19 @@ class RelationHelperTest extends TestCase
             [true, 'id', 'line_manager', 'line_manager'],
             // columns that contain the letters of the primary key as part of their name
             [false, 'id', 'holiday', 'holiday'],
-            [true, 'id', 'something_identifier_id', 'something_identifier']
+            [true, 'id', 'something_identifier_id', 'something_identifier'],
         ];
     }
 
     /**
      * @dataProvider provideKeys
      *
-     * @param bool $usesSnakeAttributes
-     * @param string $primaryKey
-     * @param string $foreignKey
-     * @param string $expected
+     * @param  bool  $usesSnakeAttributes
+     * @param  string  $primaryKey
+     * @param  string  $foreignKey
+     * @param  string  $expected
      */
-    public function testNameUsingForeignKeyStrategy($usesSnakeAttributes, $primaryKey, $foreignKey, $expected)
+    public function test_name_using_foreign_key_strategy($usesSnakeAttributes, $primaryKey, $foreignKey, $expected)
     {
         $this->assertEquals(
             $expected,

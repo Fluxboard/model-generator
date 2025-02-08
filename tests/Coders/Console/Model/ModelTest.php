@@ -32,12 +32,12 @@ class ModelTest extends TestCase
                 'expect' => 'array|null',
             ],
             'Non-nullable date' => [
-                'castType' => 'date',
+                'castType' => 'datetime',
                 'nullable' => false,
                 'expect' => '\Carbon\Carbon',
             ],
             'Nullable date' => [
-                'castType' => 'date',
+                'castType' => 'datetime',
                 'nullable' => true,
                 'expect' => '\Carbon\Carbon|null',
             ],
@@ -47,11 +47,11 @@ class ModelTest extends TestCase
     /**
      * @dataProvider dataForTestPhpTypeHint
      *
-     * @param string $castType
-     * @param bool $nullable
-     * @param string $expect
+     * @param  string  $castType
+     * @param  bool  $nullable
+     * @param  string  $expect
      */
-    public function testPhpTypeHint($castType, $nullable, $expect)
+    public function test_php_type_hint($castType, $nullable, $expect)
     {
         $model = new Model(
             new Blueprint('test', 'test', 'test'),
@@ -59,7 +59,7 @@ class ModelTest extends TestCase
                 \Mockery::mock(\Illuminate\Database\DatabaseManager::class),
                 \Mockery::mock(Illuminate\Filesystem\Filesystem::class),
                 \Mockery::mock(\Reliese\Support\Classify::class),
-                new \Reliese\Coders\Model\Config()
+                new \Reliese\Coders\Model\Config
             )
         );
 
@@ -69,10 +69,11 @@ class ModelTest extends TestCase
 
     /**
      * @dataProvider provideDataForTestNullableRelationships
-     * @param bool $nullable
-     * @param string $expectedTypehint
+     *
+     * @param  bool  $nullable
+     * @param  string  $expectedTypehint
      */
-    public function testBelongsToNullableRelationships($nullable, $expectedTypehint)
+    public function test_belongs_to_nullable_relationships($nullable, $expectedTypehint)
     {
         $columnDefinition = new Fluent(
             [
@@ -96,15 +97,15 @@ class ModelTest extends TestCase
                 \Mockery::mock(\Illuminate\Database\DatabaseManager::class),
                 \Mockery::mock(Illuminate\Filesystem\Filesystem::class),
                 \Mockery::mock(\Reliese\Support\Classify::class),
-                new \Reliese\Coders\Model\Config()
+                new \Reliese\Coders\Model\Config
             )
         );
 
         $relation = new BelongsTo(
             new Fluent([
                 'columns' => [
-                    $columnDefinition
-                ]
+                    $columnDefinition,
+                ],
             ]),
             $model,
             $model
@@ -117,11 +118,13 @@ class ModelTest extends TestCase
     {
         return [
             'Nullable Relation' => [
-                true, '\\\\Thing|null'
+                true,
+                '\\\\Thing|null',
             ],
             'Non Nullable Relation' => [
-                false, '\\\\Thing'
-            ]
+                false,
+                '\\\\Thing',
+            ],
         ];
     }
 }

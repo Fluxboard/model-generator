@@ -27,12 +27,12 @@ class BelongsToTest extends TestCase
     /**
      * @dataProvider provideForeignKeyStrategyPermutations
      *
-     * @param bool $usesSnakeAttributes
-     * @param string $primaryKey
-     * @param string $foreignKey
-     * @param string $expected
+     * @param  bool  $usesSnakeAttributes
+     * @param  string  $primaryKey
+     * @param  string  $foreignKey
+     * @param  string  $expected
      */
-    public function testNameUsingForeignKeyStrategy($usesSnakeAttributes, $primaryKey, $foreignKey, $expected)
+    public function test_name_using_foreign_key_strategy($usesSnakeAttributes, $primaryKey, $foreignKey, $expected)
     {
         $relation = Mockery::mock(Fluent::class)->makePartial();
 
@@ -67,11 +67,11 @@ class BelongsToTest extends TestCase
     /**
      * @dataProvider provideRelatedStrategyPermutations
      *
-     * @param bool $usesSnakeAttributes
-     * @param string $relatedClassName
-     * @param string $expected
+     * @param  bool  $usesSnakeAttributes
+     * @param  string  $relatedClassName
+     * @param  string  $expected
      */
-    public function testNameUsingRelatedStrategy($usesSnakeAttributes, $relatedClassName, $expected)
+    public function test_name_using_related_strategy($usesSnakeAttributes, $relatedClassName, $expected)
     {
         $relation = Mockery::mock(Fluent::class)->makePartial();
 

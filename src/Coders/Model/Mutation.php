@@ -24,8 +24,8 @@ class Mutation
     /**
      * Mutation constructor.
      *
-     * @param string $name
-     * @param string $body
+     * @param  string  $name
+     * @param  string  $body
      */
     public function __construct($name, $body)
     {

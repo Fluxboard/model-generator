@@ -7,11 +7,11 @@
 
 namespace Reliese\Coders\Model\Relations;
 
-use Illuminate\Support\Str;
-use Reliese\Support\Dumper;
 use Illuminate\Support\Fluent;
+use Illuminate\Support\Str;
 use Reliese\Coders\Model\Model;
 use Reliese\Coders\Model\Relation;
+use Reliese\Support\Dumper;
 
 class BelongsTo implements Relation
 {
@@ -32,10 +32,6 @@ class BelongsTo implements Relation
 
     /**
      * BelongsToWriter constructor.
-     *
-     * @param \Illuminate\Support\Fluent $command
-     * @param \Reliese\Coders\Model\Model $parent
-     * @param \Reliese\Coders\Model\Model $related
      */
     public function __construct(Fluent $command, Model $parent, Model $related)
     {
@@ -81,14 +77,18 @@ class BelongsTo implements Relation
 
         if ($this->needsForeignKey()) {
             $foreignKey = $this->parent->usesPropertyConstants()
-                ? $this->parent->getQualifiedUserClassName().'::'.strtoupper($this->foreignKey())
+                ? $this->parent->getQualifiedUserClassName().
+                    '::'.
+                    strtoupper($this->foreignKey())
                 : $this->foreignKey();
             $body .= ', '.Dumper::export($foreignKey);
         }
 
         if ($this->needsOtherKey()) {
             $otherKey = $this->related->usesPropertyConstants()
-                ? $this->related->getQualifiedUserClassName().'::'.strtoupper($this->otherKey())
+                ? $this->related->getQualifiedUserClassName().
+                    '::'.
+                    strtoupper($this->otherKey())
                 : $this->otherKey();
             $body .= ', '.Dumper::export($otherKey);
         }
@@ -100,7 +100,8 @@ class BelongsTo implements Relation
             // or a composite unique key. Otherwise it should be a has-many relationship which is not
             // supported at the moment. @todo: Improve relationship resolution.
             foreach ($this->command->references as $index => $column) {
-                $body .= "\n\t\t\t\t\t->where(".
+                $body .=
+                    "\n\t\t\t\t\t->where(".
                     Dumper::export($this->qualifiedOtherKey($index)).
                     ", '=', ".
                     Dumper::export($this->qualifiedForeignKey($index)).
@@ -118,7 +119,7 @@ class BelongsTo implements Relation
      */
     public function hint()
     {
-        $base =  $this->related->getQualifiedUserClassName();
+        $base = $this->related->getQualifiedUserClassName();
 
         if ($this->isNullable()) {
             $base .= '|null';
@@ -142,12 +143,12 @@ class BelongsTo implements Relation
     {
         $defaultForeignKey = $this->related->getRecordName().'_id';
 
-        return $defaultForeignKey != $this->foreignKey() || $this->needsOtherKey();
+        return $defaultForeignKey != $this->foreignKey() ||
+            $this->needsOtherKey();
     }
 
     /**
-     * @param int $index
-     *
+     * @param  int  $index
      * @return string
      */
     protected function foreignKey($index = 0)
@@ -156,8 +157,7 @@ class BelongsTo implements Relation
     }
 
     /**
-     * @param int $index
-     *
+     * @param  int  $index
      * @return string
      */
     protected function qualifiedForeignKey($index = 0)
@@ -176,8 +176,7 @@ class BelongsTo implements Relation
     }
 
     /**
-     * @param int $index
-     *
+     * @param  int  $index
      * @return string
      */
     protected function otherKey($index = 0)
@@ -186,8 +185,7 @@ class BelongsTo implements Relation
     }
 
     /**
-     * @param int $index
-     *
+     * @param  int  $index
      * @return string
      */
     protected function qualifiedOtherKey($index = 0)
@@ -210,6 +208,9 @@ class BelongsTo implements Relation
      */
     private function isNullable()
     {
-        return (bool) $this->parent->getBlueprint()->column($this->foreignKey())->get('nullable');
+        return (bool) $this->parent
+            ->getBlueprint()
+            ->column($this->foreignKey())
+            ->get('nullable');
     }
 }

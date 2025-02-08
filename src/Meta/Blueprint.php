@@ -59,9 +59,9 @@ class Blueprint
     /**
      * Blueprint constructor.
      *
-     * @param string $connection
-     * @param string $schema
-     * @param string $table
+     * @param  string  $connection
+     * @param  string  $schema
+     * @param  string  $table
      */
     public function __construct($connection, $schema, $table, $isView = false)
     {
@@ -96,8 +96,6 @@ class Blueprint
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $column
-     *
      * @return $this
      */
     public function withColumn(Fluent $column)
@@ -116,8 +114,7 @@ class Blueprint
     }
 
     /**
-     * @param string $name
-     *
+     * @param  string  $name
      * @return bool
      */
     public function hasColumn($name)
@@ -126,22 +123,21 @@ class Blueprint
     }
 
     /**
-     * @param string $name
-     *
+     * @param  string  $name
      * @return \Illuminate\Support\Fluent
      */
     public function column($name)
     {
         if (! $this->hasColumn($name)) {
-            throw new \InvalidArgumentException("Column [$name] does not belong to table [{$this->qualifiedTable()}]");
+            throw new \InvalidArgumentException(
+                "Column [$name] does not belong to table [{$this->qualifiedTable()}]"
+            );
         }
 
         return $this->columns[$name];
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $index
-     *
      * @return $this
      */
     public function withIndex(Fluent $index)
@@ -164,8 +160,6 @@ class Blueprint
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $index
-     *
      * @return $this
      */
     public function withRelation(Fluent $index)
@@ -184,8 +178,6 @@ class Blueprint
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $primaryKey
-     *
      * @return $this
      */
     public function withPrimaryKey(Fluent $primaryKey)
@@ -230,9 +222,8 @@ class Blueprint
     }
 
     /**
-     * @param string $database
-     * @param string $table
-     *
+     * @param  string  $database
+     * @param  string  $table
      * @return bool
      */
     public function is($database, $table)
@@ -241,8 +232,6 @@ class Blueprint
     }
 
     /**
-     * @param \Reliese\Meta\Blueprint $table
-     *
      * @return array
      */
     public function references(self $table)
@@ -250,7 +239,7 @@ class Blueprint
         $references = [];
 
         foreach ($this->relations() as $relation) {
-            list($foreignDatabase, $foreignTable) = array_values($relation->on);
+            [$foreignDatabase, $foreignTable] = array_values($relation->on);
             if ($table->is($foreignDatabase, $foreignTable)) {
                 $references[] = $relation;
             }
@@ -260,14 +249,11 @@ class Blueprint
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $constraint
-     *
      * @return bool
      */
     public function isUniqueKey(Fluent $constraint)
     {
         foreach ($this->unique as $index) {
-
             // We only need to consider cases, when UNIQUE KEY is presented by only ONE column
             if (count($index->columns) === 1 && isset($index->columns[0])) {
                 if (in_array($index->columns[0], $constraint->columns)) {

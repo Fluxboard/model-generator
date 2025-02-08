@@ -7,8 +7,8 @@
 
 namespace Reliese\Coders\Model\Relations;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class HasMany extends HasOneOrMany
 {
@@ -17,7 +17,11 @@ class HasMany extends HasOneOrMany
      */
     public function hint()
     {
-        return '\\'.Collection::class.'|'.$this->related->getQualifiedUserClassName().'[]';
+        return '\\'.
+            Collection::class.
+            '|'.
+            $this->related->getQualifiedUserClassName().
+            '[]';
     }
 
     /**
@@ -32,10 +36,16 @@ class HasMany extends HasOneOrMany
                     $this->localKey(),
                     $this->foreignKey()
                 );
-                if (Str::snake($relationName) === Str::snake($this->parent->getClassName())) {
+                if (
+                    Str::snake($relationName) ===
+                    Str::snake($this->parent->getClassName())
+                ) {
                     $relationName = Str::plural($this->related->getClassName());
                 } else {
-                    $relationName = Str::plural($this->related->getClassName()) . 'Where' . ucfirst(Str::singular($relationName));
+                    $relationName =
+                        Str::plural($this->related->getClassName()).
+                        'Where'.
+                        ucfirst(Str::singular($relationName));
                 }
                 break;
             default:

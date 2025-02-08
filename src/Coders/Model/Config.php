@@ -20,7 +20,7 @@ class Config
     /**
      * ModelConfig constructor.
      *
-     * @param array $config
+     * @param  array  $config
      */
     public function __construct($config = [])
     {
@@ -28,10 +28,8 @@ class Config
     }
 
     /**
-     * @param \Reliese\Meta\Blueprint $blueprint
-     * @param string $key
-     * @param mixed $default
-     *
+     * @param  string  $key
+     * @param  mixed  $default
      * @return mixed
      */
     public function get(Blueprint $blueprint, $key, $default = null)
@@ -48,7 +46,7 @@ class Config
         foreach ($priorityKeys as $key) {
             $value = Arr::get($this->config, $key);
 
-            if (!is_null($value)) {
+            if (! is_null($value)) {
                 return $value;
             }
         }

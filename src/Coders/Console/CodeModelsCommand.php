@@ -3,8 +3,8 @@
 namespace Reliese\Coders\Console;
 
 use Illuminate\Console\Command;
-use Reliese\Coders\Model\Factory;
 use Illuminate\Contracts\Config\Repository;
+use Reliese\Coders\Model\Factory;
 
 class CodeModelsCommand extends Command
 {
@@ -37,9 +37,6 @@ class CodeModelsCommand extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @param \Reliese\Coders\Model\Factory $models
-     * @param \Illuminate\Contracts\Config\Repository $config
      */
     public function __construct(Factory $models, Repository $config)
     {
@@ -76,17 +73,17 @@ class CodeModelsCommand extends Command
      */
     protected function getConnection()
     {
-        return $this->option('connection') ?: $this->config->get('database.default');
+        return $this->option('connection') ?:
+            $this->config->get('database.default');
     }
 
     /**
-     * @param $connection
-     *
      * @return string
      */
     protected function getSchema($connection)
     {
-        return $this->option('schema') ?: $this->config->get("database.connections.$connection.database");
+        return $this->option('schema') ?:
+            $this->config->get("database.connections.$connection.database");
     }
 
     /**

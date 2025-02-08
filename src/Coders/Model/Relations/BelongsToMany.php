@@ -7,12 +7,12 @@
 
 namespace Reliese\Coders\Model\Relations;
 
-use Illuminate\Support\Str;
-use Reliese\Support\Dumper;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Fluent;
+use Illuminate\Support\Str;
 use Reliese\Coders\Model\Model;
 use Reliese\Coders\Model\Relation;
-use Illuminate\Database\Eloquent\Collection;
+use Reliese\Support\Dumper;
 
 class BelongsToMany implements Relation
 {
@@ -43,12 +43,6 @@ class BelongsToMany implements Relation
 
     /**
      * BelongsToMany constructor.
-     *
-     * @param \Illuminate\Support\Fluent $parentCommand
-     * @param \Illuminate\Support\Fluent $referenceCommand
-     * @param \Reliese\Coders\Model\Model $parent
-     * @param \Reliese\Coders\Model\Model $pivot
-     * @param \Reliese\Coders\Model\Model $reference
      */
     public function __construct(
         Fluent $parentCommand,
@@ -69,7 +63,11 @@ class BelongsToMany implements Relation
      */
     public function hint()
     {
-        return '\\'.Collection::class.'|'.$this->reference->getQualifiedUserClassName().'[]';
+        return '\\'.
+            Collection::class.
+            '|'.
+            $this->reference->getQualifiedUserClassName().
+            '[]';
     }
 
     /**
@@ -107,14 +105,18 @@ class BelongsToMany implements Relation
 
         if ($this->needsForeignKey()) {
             $foreignKey = $this->parent->usesPropertyConstants()
-                ? $this->reference->getQualifiedUserClassName().'::'.strtoupper($this->foreignKey())
+                ? $this->reference->getQualifiedUserClassName().
+                    '::'.
+                    strtoupper($this->foreignKey())
                 : $this->foreignKey();
             $body .= ', '.Dumper::export($foreignKey);
         }
 
         if ($this->needsOtherKey()) {
             $otherKey = $this->reference->usesPropertyConstants()
-                ? $this->reference->getQualifiedUserClassName().'::'.strtoupper($this->otherKey())
+                ? $this->reference->getQualifiedUserClassName().
+                    '::'.
+                    strtoupper($this->otherKey())
                 : $this->otherKey();
             $body .= ', '.Dumper::export($otherKey);
         }
@@ -124,7 +126,8 @@ class BelongsToMany implements Relation
         $fields = $this->getPivotFields();
 
         if (! empty($fields)) {
-            $body .= "\n\t\t\t\t\t->withPivot(".$this->parametrize($fields).')';
+            $body .=
+                "\n\t\t\t\t\t->withPivot(".$this->parametrize($fields).')';
         }
 
         if ($this->pivot->usesTimestamps()) {
@@ -153,7 +156,8 @@ class BelongsToMany implements Relation
         sort($models);
         $defaultPivotTable = strtolower(implode('_', $models));
 
-        return $this->pivotTable() != $defaultPivotTable || $this->needsForeignKey();
+        return $this->pivotTable() != $defaultPivotTable ||
+            $this->needsForeignKey();
     }
 
     /**
@@ -175,7 +179,8 @@ class BelongsToMany implements Relation
     {
         $defaultForeignKey = $this->parentRecordName().'_id';
 
-        return $this->foreignKey() != $defaultForeignKey || $this->needsOtherKey();
+        return $this->foreignKey() != $defaultForeignKey ||
+            $this->needsOtherKey();
     }
 
     /**
@@ -233,18 +238,22 @@ class BelongsToMany implements Relation
     }
 
     /**
-     * @param array $fields
-     *
+     * @param  array  $fields
      * @return string
      */
     private function parametrize($fields = [])
     {
-        return (string) implode(', ', array_map(function ($field) {
-            $field = $this->reference->usesPropertyConstants()
-                ? $this->pivot->getQualifiedUserClassName().'::'.strtoupper($field)
-                : $field;
+        return (string) implode(
+            ', ',
+            array_map(function ($field) {
+                $field = $this->reference->usesPropertyConstants()
+                    ? $this->pivot->getQualifiedUserClassName().
+                        '::'.
+                        strtoupper($field)
+                    : $field;
 
-            return Dumper::export($field);
-        }, $fields));
+                return Dumper::export($field);
+            }, $fields)
+        );
     }
 }

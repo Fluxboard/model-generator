@@ -20,24 +20,54 @@ class Column implements \Reliese\Meta\Column
      * @var array
      */
     protected $metas = [
-        'type', 'name', 'autoincrement', 'nullable', 'default', 'comment',
+        'type',
+        'name',
+        'autoincrement',
+        'nullable',
+        'default',
+        'comment',
     ];
 
     /**
      * @var array
      */
     public static $mappings = [
-        'string' => ['varchar', 'text', 'string', 'char', 'enum', 'tinytext', 'mediumtext', 'longtext'],
+        'string' => [
+            'varchar',
+            'text',
+            'string',
+            'char',
+            'enum',
+            'tinytext',
+            'mediumtext',
+            'longtext',
+        ],
         'datetime' => ['datetime', 'year', 'date', 'time', 'timestamp'],
-        'int' => ['bigint', 'int', 'integer', 'tinyint', 'smallint', 'mediumint'],
-        'float' => ['float', 'decimal', 'numeric', 'dec', 'fixed', 'double', 'real', 'double precision'],
+        'int' => [
+            'bigint',
+            'int',
+            'integer',
+            'tinyint',
+            'smallint',
+            'mediumint',
+        ],
+        'float' => [
+            'float',
+            'decimal',
+            'numeric',
+            'dec',
+            'fixed',
+            'double',
+            'real',
+            'double precision',
+        ],
         'boolean' => ['longblob', 'blob', 'bit'],
     ];
 
     /**
      * MysqlColumn constructor.
      *
-     * @param array $metadata
+     * @param  array  $metadata
      */
     public function __construct($metadata = [])
     {
@@ -49,7 +79,7 @@ class Column implements \Reliese\Meta\Column
      */
     public function normalize()
     {
-        $attributes = new Fluent();
+        $attributes = new Fluent;
 
         foreach ($this->metas as $meta) {
             $this->{'parse'.ucfirst($meta)}($attributes);
@@ -58,9 +88,6 @@ class Column implements \Reliese\Meta\Column
         return $attributes;
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseType(Fluent $attributes)
     {
         $dataType = $this->metadata->getType()->getName();
@@ -76,41 +103,26 @@ class Column implements \Reliese\Meta\Column
         }
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseName(Fluent $attributes)
     {
         $attributes['name'] = $this->metadata->getName();
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseAutoincrement(Fluent $attributes)
     {
         $attributes['autoincrement'] = $this->metadata->getAutoincrement();
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseNullable(Fluent $attributes)
     {
         $attributes['nullable'] = $this->metadata->getNotnull();
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseDefault(Fluent $attributes)
     {
         $attributes['default'] = $this->metadata->getDefault();
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseComment(Fluent $attributes)
     {
         $attributes['comment'] = $this->metadata->getComment();

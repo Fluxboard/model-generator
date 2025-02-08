@@ -13,9 +13,8 @@ use Illuminate\Support\Str;
 class Classify
 {
     /**
-     * @param string $name
-     * @param string $value
-     *
+     * @param  string  $name
+     * @param  string  $value
      * @return string
      */
     public function annotation($name, $value)
@@ -26,9 +25,8 @@ class Classify
     /**
      * Constant template.
      *
-     * @param string $name
-     * @param mixed $value
-     *
+     * @param  string  $name
+     * @param  mixed  $value
      * @return string
      */
     public function constant($name, $value)
@@ -41,10 +39,9 @@ class Classify
     /**
      * Field template.
      *
-     * @param string $name
-     * @param mixed $value
-     * @param array $options
-     *
+     * @param  string  $name
+     * @param  mixed  $value
+     * @param  array  $options
      * @return string
      */
     public function field($name, $value, $options = [])
@@ -58,10 +55,9 @@ class Classify
     }
 
     /**
-     * @param string $name
-     * @param string $body
-     * @param array $options
-     *
+     * @param  string  $name
+     * @param  string  $body
+     * @param  array  $options
      * @return string
      */
     public function method($name, $body, $options = [])

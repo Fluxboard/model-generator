@@ -36,14 +36,14 @@ class HasManyTest extends TestCase
     /**
      * @dataProvider provideForeignKeyStrategyPermutations
      *
-     * @param bool $usesSnakeAttributes
-     * @param string $subjectName
-     * @param string $relationName
-     * @param string $primaryKey
-     * @param string $foreignKey
-     * @param string $expected
+     * @param  bool  $usesSnakeAttributes
+     * @param  string  $subjectName
+     * @param  string  $relationName
+     * @param  string  $primaryKey
+     * @param  string  $foreignKey
+     * @param  string  $expected
      */
-    public function testNameUsingForeignKeyStrategy($usesSnakeAttributes, $subjectName, $relationName, $primaryKey, $foreignKey, $expected)
+    public function test_name_using_foreign_key_strategy($usesSnakeAttributes, $subjectName, $relationName, $primaryKey, $foreignKey, $expected)
     {
         $relation = Mockery::mock(Fluent::class)->makePartial();
 
@@ -75,19 +75,19 @@ class HasManyTest extends TestCase
             [false, 'StaffMember', 'BlogPost', 'blogPosts'],
             [true, 'StaffMember', 'BlogPost', 'blog_posts'],
             // Same table reference
-            [false, 'StaffMember', 'StaffMember', 'staffMembers']
+            [false, 'StaffMember', 'StaffMember', 'staffMembers'],
         ];
     }
 
     /**
      * @dataProvider provideRelatedStrategyPermutations
      *
-     * @param bool $usesSnakeAttributes
-     * @param string $subjectName
-     * @param string $relationName
-     * @param string $expected
+     * @param  bool  $usesSnakeAttributes
+     * @param  string  $subjectName
+     * @param  string  $relationName
+     * @param  string  $expected
      */
-    public function testNameUsingRelatedStrategy($usesSnakeAttributes, $subjectName, $relationName, $expected)
+    public function test_name_using_related_strategy($usesSnakeAttributes, $subjectName, $relationName, $expected)
     {
         $relation = Mockery::mock(Fluent::class)->makePartial();
 

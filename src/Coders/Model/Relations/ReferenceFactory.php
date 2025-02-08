@@ -29,8 +29,8 @@ class ReferenceFactory
     /**
      * ReferenceFactory constructor.
      *
-     * @param array $related
-     * @param \Reliese\Coders\Model\Model $parent
+     * @param  array  $related
+     * @param  \Reliese\Coders\Model\Model  $parent
      */
     public function __construct($related, $parent)
     {
@@ -47,14 +47,26 @@ class ReferenceFactory
             $relations = [];
 
             foreach ($this->references as $reference) {
-                $relation = new BelongsToMany($this->getRelatedReference(), $reference['command'], $this->parent, $this->getRelatedModel(), $reference['model']);
+                $relation = new BelongsToMany(
+                    $this->getRelatedReference(),
+                    $reference['command'],
+                    $this->parent,
+                    $this->getRelatedModel(),
+                    $reference['model']
+                );
                 $relations[$relation->name()] = $relation;
             }
 
             return $relations;
         }
 
-        return [new HasOneOrManyStrategy($this->getRelatedReference(), $this->parent, $this->getRelatedModel())];
+        return [
+            new HasOneOrManyStrategy(
+                $this->getRelatedReference(),
+                $this->parent,
+                $this->getRelatedModel()
+            ),
+        ];
     }
 
     /**
@@ -67,9 +79,7 @@ class ReferenceFactory
 
         // See whether this potencial pivot table has the parent record name in it.
         // Not sure whether we should only take into account composite primary keys.
-        if (
-            ! Str::contains($pivot, $firstRecord)
-        ) {
+        if (! Str::contains($pivot, $firstRecord)) {
             return false;
         }
 

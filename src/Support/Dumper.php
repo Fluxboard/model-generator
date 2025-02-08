@@ -12,8 +12,7 @@ class Dumper
     /**
      * Analyzed passed value and returns true if passed value uses class static call.
      *
-     * @param mixed $value Value to check
-     *
+     * @param  mixed  $value  Value to check
      * @return bool
      */
     private static function hasStaticCall($value)
@@ -22,9 +21,8 @@ class Dumper
     }
 
     /**
-     * @param mixed $value
-     * @param int $tabs
-     *
+     * @param  mixed  $value
+     * @param  int  $tabs
      * @return string
      */
     public static function export($value, $tabs = 2)
@@ -34,20 +32,28 @@ class Dumper
             $indent = str_repeat("\t", $tabs);
             $closingIndent = str_repeat("\t", $tabs - 1);
             $keys = array_keys($value);
-            $array = array_map(function ($value, $key) use ($tabs) {
-                if (is_numeric($key)) {
-                    return static::export($value, $tabs + 1);
-                }
+            $array = array_map(
+                function ($value, $key) use ($tabs) {
+                    if (is_numeric($key)) {
+                        return static::export($value, $tabs + 1);
+                    }
 
-                $key = static::hasStaticCall($key) ? $key : "'$key'";
+                    $key = static::hasStaticCall($key) ? $key : "'$key'";
 
-                return "$key => ".static::export($value, $tabs + 1);
-            }, $value, $keys);
+                    return "$key => ".static::export($value, $tabs + 1);
+                },
+                $value,
+                $keys
+            );
 
-            return "[\n$indent".implode(",\n$indent", $array)."\n$closingIndent]";
+            return "[\n$indent".
+                implode(",\n$indent", $array).
+                "\n$closingIndent]";
         }
 
         // Default variable exporting
-        return static::hasStaticCall($value) ? $value : var_export($value, true);
+        return static::hasStaticCall($value)
+            ? $value
+            : var_export($value, true);
     }
 }

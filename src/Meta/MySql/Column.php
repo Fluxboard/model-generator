@@ -8,8 +8,8 @@
 namespace Reliese\Meta\MySql;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Support\Fluent;
+use Illuminate\Support\Str;
 
 class Column implements \Reliese\Meta\Column
 {
@@ -22,24 +22,59 @@ class Column implements \Reliese\Meta\Column
      * @var array
      */
     protected $metas = [
-        'type', 'name', 'autoincrement', 'nullable', 'default', 'comment',
+        'type',
+        'name',
+        'autoincrement',
+        'nullable',
+        'default',
+        'comment',
     ];
 
     /**
      * @var array
      */
     public static $mappings = [
-        'string' => ['varchar', 'text', 'string', 'char', 'enum', 'set', 'tinytext', 'mediumtext', 'longtext', 'longblob', 'mediumblob', 'tinyblob', 'blob'],
+        'string' => [
+            'varchar',
+            'text',
+            'string',
+            'char',
+            'enum',
+            'set',
+            'tinytext',
+            'mediumtext',
+            'longtext',
+            'longblob',
+            'mediumblob',
+            'tinyblob',
+            'blob',
+        ],
         'datetime' => ['datetime', 'year', 'date', 'time', 'timestamp'],
-        'int' => ['bigint', 'int', 'integer', 'tinyint', 'smallint', 'mediumint'],
-        'float' => ['float', 'decimal', 'numeric', 'dec', 'fixed', 'double', 'real', 'double precision'],
-        'boolean' => ['bit']
+        'int' => [
+            'bigint',
+            'int',
+            'integer',
+            'tinyint',
+            'smallint',
+            'mediumint',
+        ],
+        'float' => [
+            'float',
+            'decimal',
+            'numeric',
+            'dec',
+            'fixed',
+            'double',
+            'real',
+            'double precision',
+        ],
+        'boolean' => ['bit'],
     ];
 
     /**
      * MysqlColumn constructor.
      *
-     * @param array $metadata
+     * @param  array  $metadata
      */
     public function __construct($metadata = [])
     {
@@ -51,7 +86,7 @@ class Column implements \Reliese\Meta\Column
      */
     public function normalize()
     {
-        $attributes = new Fluent();
+        $attributes = new Fluent;
 
         foreach ($this->metas as $meta) {
             $this->{'parse'.ucfirst($meta)}($attributes);
@@ -60,14 +95,11 @@ class Column implements \Reliese\Meta\Column
         return $attributes;
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseType(Fluent $attributes)
     {
         $type = $this->get('Type', 'string');
 
-        preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $type, $matches);
+        preg_match("/^(\w+)(?:\(([^\)]+)\))?/", $type, $matches);
 
         $dataType = strtolower($matches[1]);
         $attributes['type'] = $dataType;
@@ -88,12 +120,14 @@ class Column implements \Reliese\Meta\Column
     }
 
     /**
-     * @param string $databaseType
-     * @param string $precision
-     * @param \Illuminate\Support\Fluent $attributes
+     * @param  string  $databaseType
+     * @param  string  $precision
      */
-    protected function parsePrecision($databaseType, $precision, Fluent $attributes)
-    {
+    protected function parsePrecision(
+        $databaseType,
+        $precision,
+        Fluent $attributes
+    ) {
         $precision = explode(',', str_replace("'", '', $precision));
 
         // Check whether it's an enum
@@ -124,17 +158,11 @@ class Column implements \Reliese\Meta\Column
         }
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseName(Fluent $attributes)
     {
         $attributes['name'] = $this->get('Field');
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseAutoincrement(Fluent $attributes)
     {
         if ($this->same('Extra', 'auto_increment')) {
@@ -142,34 +170,24 @@ class Column implements \Reliese\Meta\Column
         }
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseNullable(Fluent $attributes)
     {
         $attributes['nullable'] = $this->same('Null', 'YES');
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseDefault(Fluent $attributes)
     {
         $attributes['default'] = $this->get('Default');
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $attributes
-     */
     protected function parseComment(Fluent $attributes)
     {
         $attributes['comment'] = $this->get('Comment');
     }
 
     /**
-     * @param string $key
-     * @param mixed $default
-     *
+     * @param  string  $key
+     * @param  mixed  $default
      * @return mixed
      */
     protected function get($key, $default = null)
@@ -178,9 +196,8 @@ class Column implements \Reliese\Meta\Column
     }
 
     /**
-     * @param string $key
-     * @param string $value
-     *
+     * @param  string  $key
+     * @param  string  $value
      * @return bool
      */
     protected function same($key, $value)

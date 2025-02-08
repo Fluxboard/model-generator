@@ -27,8 +27,6 @@ class Mutator
     protected $body;
 
     /**
-     * @param \Closure $condition
-     *
      * @return $this
      */
     public function when(\Closure $condition)
@@ -39,9 +37,7 @@ class Mutator
     }
 
     /**
-     * @param string $column
-     * @param \Reliese\Meta\Blueprint $blueprint
-     *
+     * @param  string  $column
      * @return mixed
      */
     public function applies($column, Blueprint $blueprint)
@@ -50,8 +46,6 @@ class Mutator
     }
 
     /**
-     * @param \Closure $name
-     *
      * @return $this
      */
     public function name(\Closure $name)
@@ -62,9 +56,7 @@ class Mutator
     }
 
     /**
-     * @param string $attribute
-     * @param \Reliese\Coders\Model\Model $model
-     *
+     * @param  string  $attribute
      * @return string
      */
     public function getName($attribute, Model $model)
@@ -73,8 +65,6 @@ class Mutator
     }
 
     /**
-     * @param \Closure $body
-     *
      * @return $this
      */
     public function body(\Closure $body)
@@ -85,9 +75,7 @@ class Mutator
     }
 
     /**
-     * @param string $attribute
-     * @param \Reliese\Coders\Model\Model $model
-     *
+     * @param  string  $attribute
      * @return string
      */
     public function getBody($attribute, Model $model)

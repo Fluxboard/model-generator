@@ -2,12 +2,12 @@
 
 namespace Reliese\Coders;
 
-use Reliese\Support\Classify;
-use Reliese\Coders\Model\Config;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;
 use Reliese\Coders\Console\CodeModelsCommand;
+use Reliese\Coders\Model\Config;
 use Reliese\Coders\Model\Factory as ModelFactory;
+use Reliese\Support\Classify;
 
 class CodersServiceProvider extends ServiceProvider
 {
@@ -24,13 +24,16 @@ class CodersServiceProvider extends ServiceProvider
     public function boot()
     {
         if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../../config/models.php' => config_path('models.php'),
-            ], 'reliese-models');
+            $this->publishes(
+                [
+                    __DIR__.'/../../config/models.php' => config_path(
+                        'models.php'
+                    ),
+                ],
+                'reliese-models'
+            );
 
-            $this->commands([
-                CodeModelsCommand::class,
-            ]);
+            $this->commands([CodeModelsCommand::class]);
         }
     }
 
@@ -55,7 +58,7 @@ class CodersServiceProvider extends ServiceProvider
             return new ModelFactory(
                 $app->make('db'),
                 $app->make(Filesystem::class),
-                new Classify(),
+                new Classify,
                 new Config($app->make('config')->get('models'))
             );
         });

@@ -10,8 +10,7 @@ namespace Reliese\Database\Eloquent;
 trait BitBooleans
 {
     /**
-     * @param mixed $value
-     *
+     * @param  mixed  $value
      * @return bool
      */
     public function fromBool($value)
@@ -27,8 +26,7 @@ trait BitBooleans
     }
 
     /**
-     * @param mixed $value
-     *
+     * @param  mixed  $value
      * @return bool
      */
     public function fromBoolean($value)
@@ -37,8 +35,7 @@ trait BitBooleans
     }
 
     /**
-     * @param mixed $value
-     *
+     * @param  mixed  $value
      * @return mixed
      */
     public function toBool($value)
@@ -54,8 +51,7 @@ trait BitBooleans
     }
 
     /**
-     * @param mixed $value
-     *
+     * @param  mixed  $value
      * @return mixed
      */
     public function toBoolean($value)

@@ -22,18 +22,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * @param string $key
-     *
+     * @param  string  $key
      * @return bool
      */
     protected function hasCustomGetCaster($key)
     {
-        return $this->hasCast($key) && method_exists($this, $this->getCustomGetCaster($key));
+        return $this->hasCast($key) &&
+            method_exists($this, $this->getCustomGetCaster($key));
     }
 
     /**
-     * @param string $key
-     *
+     * @param  string  $key
      * @return string
      */
     protected function getCustomGetCaster($key)
@@ -54,18 +53,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * @param string $key
-     *
+     * @param  string  $key
      * @return bool
      */
     private function hasCustomSetCaster($key)
     {
-        return $this->hasCast($key) && method_exists($this, $this->getCustomSetCaster($key));
+        return $this->hasCast($key) &&
+            method_exists($this, $this->getCustomSetCaster($key));
     }
 
     /**
-     * @param string $key
-     *
+     * @param  string  $key
      * @return string
      */
     private function getCustomSetCaster($key)

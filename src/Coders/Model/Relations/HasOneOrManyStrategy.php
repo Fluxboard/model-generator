@@ -20,10 +20,6 @@ class HasOneOrManyStrategy implements Relation
 
     /**
      * HasManyWriter constructor.
-     *
-     * @param \Illuminate\Support\Fluent $command
-     * @param \Reliese\Coders\Model\Model $parent
-     * @param \Reliese\Coders\Model\Model $related
      */
     public function __construct(Fluent $command, Model $parent, Model $related)
     {
@@ -66,8 +62,8 @@ class HasOneOrManyStrategy implements Relation
      */
     public function returnType()
     {
-        return get_class($this->relation) === HasMany::class ?
-            \Illuminate\Database\Eloquent\Relations\HasMany::class :
-            \Illuminate\Database\Eloquent\Relations\HasOne::class;
+        return get_class($this->relation) === HasMany::class
+            ? \Illuminate\Database\Eloquent\Relations\HasMany::class
+            : \Illuminate\Database\Eloquent\Relations\HasOne::class;
     }
 }

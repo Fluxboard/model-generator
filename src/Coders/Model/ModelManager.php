@@ -8,8 +8,8 @@
 namespace Reliese\Coders\Model;
 
 use ArrayIterator;
-use IteratorAggregate;
 use Illuminate\Support\Arr;
+use IteratorAggregate;
 
 class ModelManager implements IteratorAggregate
 {
@@ -25,8 +25,6 @@ class ModelManager implements IteratorAggregate
 
     /**
      * ModelManager constructor.
-     *
-     * @param \Reliese\Coders\Model\Factory $factory
      */
     public function __construct(Factory $factory)
     {
@@ -34,11 +32,10 @@ class ModelManager implements IteratorAggregate
     }
 
     /**
-     * @param string $schema
-     * @param string $table
-     * @param \Reliese\Coders\Model\Mutator[] $mutators
-     * @param bool $withRelations
-     *
+     * @param  string  $schema
+     * @param  string  $table
+     * @param  \Reliese\Coders\Model\Mutator[]  $mutators
+     * @param  bool  $withRelations
      * @return \Reliese\Coders\Model\Model
      */
     public function make($schema, $table, $mutators = [], $withRelations = true)
@@ -51,7 +48,12 @@ class ModelManager implements IteratorAggregate
             return $this->models[$schema][$table];
         }
 
-        $model = new Model($blueprint, $this->factory, $mutators, $withRelations);
+        $model = new Model(
+            $blueprint,
+            $this->factory,
+            $mutators,
+            $withRelations
+        );
 
         if ($withRelations) {
             $this->models[$schema][$table] = $model;

@@ -8,15 +8,15 @@
 namespace Reliese\Meta;
 
 use ArrayIterator;
-use RuntimeException;
-use IteratorAggregate;
-use Illuminate\Database\MySqlConnection;
-use Illuminate\Database\SQLiteConnection;
-use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\MySqlConnection;
+use Illuminate\Database\PostgresConnection;
+use Illuminate\Database\SQLiteConnection;
+use IteratorAggregate;
 use Reliese\Meta\MySql\Schema as MySqlSchema;
-use Reliese\Meta\Sqlite\Schema as SqliteSchema;
 use Reliese\Meta\Postgres\Schema as PostgresSchema;
+use Reliese\Meta\Sqlite\Schema as SqliteSchema;
+use RuntimeException;
 
 class SchemaManager implements IteratorAggregate
 {
@@ -43,8 +43,6 @@ class SchemaManager implements IteratorAggregate
 
     /**
      * SchemaManager constructor.
-     *
-     * @param \Illuminate\Database\ConnectionInterface $connection
      */
     public function __construct(ConnectionInterface $connection)
     {
@@ -59,10 +57,15 @@ class SchemaManager implements IteratorAggregate
     public function boot()
     {
         if (! $this->hasMapping()) {
-            throw new RuntimeException("There is no Schema Mapper registered for [{$this->type()}] connection.");
+            throw new RuntimeException(
+                "There is no Schema Mapper registered for [{$this->type()}] connection."
+            );
         }
 
-        $schemas = forward_static_call([$this->getMapper(), 'schemas'], $this->connection);
+        $schemas = forward_static_call(
+            [$this->getMapper(), 'schemas'],
+            $this->connection
+        );
 
         foreach ($schemas as $schema) {
             $this->make($schema);
@@ -70,8 +73,7 @@ class SchemaManager implements IteratorAggregate
     }
 
     /**
-     * @param string $schema
-     *
+     * @param  string  $schema
      * @return \Reliese\Meta\Schema
      */
     public function make($schema)
@@ -84,8 +86,7 @@ class SchemaManager implements IteratorAggregate
     }
 
     /**
-     * @param string $schema
-     *
+     * @param  string  $schema
      * @return \Reliese\Meta\Schema
      */
     protected function makeMapper($schema)
@@ -122,8 +123,8 @@ class SchemaManager implements IteratorAggregate
     /**
      * Register a new connection mapper.
      *
-     * @param string $connection
-     * @param string $mapper
+     * @param  string  $connection
+     * @param  string  $mapper
      */
     public static function register($connection, $mapper)
     {

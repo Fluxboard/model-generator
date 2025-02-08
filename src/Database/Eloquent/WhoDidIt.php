@@ -7,8 +7,8 @@
 
 namespace Reliese\Database\Eloquent;
 
-use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model as Eloquent;
+use Illuminate\Http\Request;
 
 class WhoDidIt
 {
@@ -19,25 +19,17 @@ class WhoDidIt
 
     /**
      * Blamable constructor.
-     *
-     * @param \Illuminate\Http\Request $request
      */
     public function __construct(Request $request)
     {
         $this->request = $request;
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Model $model
-     */
     public function creating(Eloquent $model)
     {
         $model->created_by = $this->doer();
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Model $model
-     */
     public function updating(Eloquent $model)
     {
         $model->updated_by = $this->doer();

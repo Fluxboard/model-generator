@@ -7,13 +7,13 @@
 
 namespace Reliese\Coders\Model;
 
-use Illuminate\Support\Str;
-use Reliese\Meta\Blueprint;
-use Illuminate\Support\Fluent;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Reliese\Coders\Model\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model as Eloquent;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Fluent;
+use Illuminate\Support\Str;
+use Reliese\Coders\Model\Relations\BelongsTo;
 use Reliese\Coders\Model\Relations\ReferenceFactory;
+use Reliese\Meta\Blueprint;
 
 class Model
 {
@@ -165,13 +165,15 @@ class Model
     /**
      * ModelClass constructor.
      *
-     * @param \Reliese\Meta\Blueprint $blueprint
-     * @param \Reliese\Coders\Model\Factory $factory
-     * @param \Reliese\Coders\Model\Mutator[] $mutators
-     * @param bool $loadRelations
+     * @param  \Reliese\Coders\Model\Mutator[]  $mutators
+     * @param  bool  $loadRelations
      */
-    public function __construct(Blueprint $blueprint, Factory $factory, $mutators = [], $loadRelations = true)
-    {
+    public function __construct(
+        Blueprint $blueprint,
+        Factory $factory,
+        $mutators = [],
+        $loadRelations = true
+    ) {
         $this->blueprint = $blueprint;
         $this->factory = $factory;
         $this->loadRelations = $loadRelations;
@@ -186,29 +188,65 @@ class Model
         $this->withParentClass($this->config('parent'));
 
         // Timestamps settings
-        $this->withTimestamps($this->config('timestamps.enabled', $this->config('timestamps', true)));
-        $this->withCreatedAtField($this->config('timestamps.fields.CREATED_AT', $this->getDefaultCreatedAtField()));
-        $this->withUpdatedAtField($this->config('timestamps.fields.UPDATED_AT', $this->getDefaultUpdatedAtField()));
+        $this->withTimestamps(
+            $this->config(
+                'timestamps.enabled',
+                $this->config('timestamps', true)
+            )
+        );
+        $this->withCreatedAtField(
+            $this->config(
+                'timestamps.fields.CREATED_AT',
+                $this->getDefaultCreatedAtField()
+            )
+        );
+        $this->withUpdatedAtField(
+            $this->config(
+                'timestamps.fields.UPDATED_AT',
+                $this->getDefaultUpdatedAtField()
+            )
+        );
 
         // Soft deletes settings
-        $this->withSoftDeletes($this->config('soft_deletes.enabled', $this->config('soft_deletes', false)));
-        $this->withDeletedAtField($this->config('soft_deletes.field', $this->getDefaultDeletedAtField()));
+        $this->withSoftDeletes(
+            $this->config(
+                'soft_deletes.enabled',
+                $this->config('soft_deletes', false)
+            )
+        );
+        $this->withDeletedAtField(
+            $this->config(
+                'soft_deletes.field',
+                $this->getDefaultDeletedAtField()
+            )
+        );
 
         // Connection settings
         $this->withConnection($this->config('connection', false));
         $this->withConnectionName($this->blueprint->connection());
 
         // Pagination settings
-        $this->withPerPage($this->config('per_page', $this->getDefaultPerPage()));
+        $this->withPerPage(
+            $this->config('per_page', $this->getDefaultPerPage())
+        );
 
         // Dates settings
-        $this->withDateFormat($this->config('date_format', $this->getDefaultDateFormat()));
+        $this->withDateFormat(
+            $this->config('date_format', $this->getDefaultDateFormat())
+        );
 
         // Table Prefix settings
-        $this->withTablePrefix($this->config('table_prefix', $this->getDefaultTablePrefix()));
+        $this->withTablePrefix(
+            $this->config('table_prefix', $this->getDefaultTablePrefix())
+        );
 
         // Relation name settings
-        $this->withRelationNameStrategy($this->config('relation_name_strategy', $this->getDefaultRelationNameStrategy()));
+        $this->withRelationNameStrategy(
+            $this->config(
+                'relation_name_strategy',
+                $this->getDefaultRelationNameStrategy()
+            )
+        );
 
         $this->definesReturnTypes = $this->config('enable_return_types', false);
 
@@ -246,15 +284,14 @@ class Model
         }
     }
 
-    /**
-     * @param \Illuminate\Support\Fluent $column
-     */
     protected function parseColumn(Fluent $column)
     {
         // TODO: Check type cast is OK
         $cast = $column->type;
 
-        $propertyName = $this->usesPropertyConstants() ? 'self::'.strtoupper($column->name) : $column->name;
+        $propertyName = $this->usesPropertyConstants()
+            ? 'self::'.strtoupper($column->name)
+            : $column->name;
 
         // Due to some casting problems when converting null to a Carbon instance,
         // we are going to treat Soft Deletes field as string.
@@ -263,7 +300,10 @@ class Model
         }
 
         // Track attribute casts, ignoring timestamps
-        if ($cast != 'string' && !in_array($propertyName, [$this->CREATED_AT, $this->UPDATED_AT])) {
+        if (
+            $cast != 'string' &&
+            ! in_array($propertyName, [$this->CREATED_AT, $this->UPDATED_AT])
+        ) {
             $this->casts[$propertyName] = $cast;
         }
 
@@ -299,7 +339,7 @@ class Model
     }
 
     /**
-     * @param string $column
+     * @param  string  $column
      */
     protected function mutate($column)
     {
@@ -314,13 +354,11 @@ class Model
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $relation
-     *
      * @return $this|\Reliese\Coders\Model\Model
      */
     public function makeRelationModel(Fluent $relation)
     {
-        list($database, $table) = array_values($relation->on);
+        [$database, $table] = array_values($relation->on);
 
         if ($this->blueprint->is($database, $table)) {
             return $this;
@@ -330,8 +368,8 @@ class Model
     }
 
     /**
-     * @param string $castType
-     * @param bool $nullable
+     * @param  string  $castType
+     * @param  bool  $nullable
      *
      * @todo Make tests
      *
@@ -343,17 +381,17 @@ class Model
 
         switch ($castType) {
             case 'object':
-                $type = '\stdClass';
+                $type = "\stdClass";
                 break;
             case 'array':
             case 'json':
                 $type = 'array';
                 break;
             case 'collection':
-                $type = '\Illuminate\Support\Collection';
+                $type = "\Illuminate\Support\Collection";
                 break;
             case 'datetime':
-                $type = '\Carbon\Carbon';
+                $type = "\Carbon\Carbon";
                 break;
             case 'binary':
                 $type = 'string';
@@ -441,7 +479,7 @@ class Model
     }
 
     /**
-     * @param \Reliese\Meta\Blueprint[] $references
+     * @param  \Reliese\Meta\Blueprint[]  $references
      */
     public function withReferences($references)
     {
@@ -449,8 +487,7 @@ class Model
     }
 
     /**
-     * @param string $namespace
-     *
+     * @param  string  $namespace
      * @return $this
      */
     public function withNamespace($namespace)
@@ -487,13 +524,12 @@ class Model
     }
 
     /**
-     * @param string $parent
-     *
+     * @param  string  $parent
      * @return $this
      */
     public function withParentClass($parent)
     {
-        $this->parentClass = '\\' . ltrim($parent, '\\');
+        $this->parentClass = $parent ? '\\'.ltrim($parent, '\\') : null;
 
         return $this;
     }
@@ -521,7 +557,7 @@ class Model
     {
         // Model names can be manually overridden by users in the config file.
         // If a config entry exists for this table, use that name, rather than generating one.
-        $overriddenName = $this->config('model_names.' . $this->getTable());
+        $overriddenName = $this->config('model_names.'.$this->getTable());
         if ($overriddenName) {
             return $overriddenName;
         }
@@ -539,15 +575,16 @@ class Model
     public function getRecordName()
     {
         if ($this->shouldPluralizeTableName()) {
-            return Str::singular($this->removeTablePrefix($this->blueprint->table()));
+            return Str::singular(
+                $this->removeTablePrefix($this->blueprint->table())
+            );
         }
 
         return $this->removeTablePrefix($this->blueprint->table());
     }
 
     /**
-     * @param bool $timestampsEnabled
-     *
+     * @param  bool  $timestampsEnabled
      * @return $this
      */
     public function withTimestamps($timestampsEnabled)
@@ -563,13 +600,12 @@ class Model
     public function usesTimestamps()
     {
         return $this->timestamps &&
-               $this->blueprint->hasColumn($this->getCreatedAtField()) &&
-               $this->blueprint->hasColumn($this->getUpdatedAtField());
+            $this->blueprint->hasColumn($this->getCreatedAtField()) &&
+            $this->blueprint->hasColumn($this->getUpdatedAtField());
     }
 
     /**
-     * @param string $field
-     *
+     * @param  string  $field
      * @return $this
      */
     public function withCreatedAtField($field)
@@ -593,7 +629,7 @@ class Model
     public function hasCustomCreatedAtField()
     {
         return $this->usesTimestamps() &&
-               $this->getCreatedAtField() != $this->getDefaultCreatedAtField();
+            $this->getCreatedAtField() != $this->getDefaultCreatedAtField();
     }
 
     /**
@@ -605,8 +641,7 @@ class Model
     }
 
     /**
-     * @param string $field
-     *
+     * @param  string  $field
      * @return $this
      */
     public function withUpdatedAtField($field)
@@ -630,7 +665,7 @@ class Model
     public function hasCustomUpdatedAtField()
     {
         return $this->usesTimestamps() &&
-               $this->getUpdatedAtField() != $this->getDefaultUpdatedAtField();
+            $this->getUpdatedAtField() != $this->getDefaultUpdatedAtField();
     }
 
     /**
@@ -642,8 +677,7 @@ class Model
     }
 
     /**
-     * @param bool $softDeletesEnabled
-     *
+     * @param  bool  $softDeletesEnabled
      * @return $this
      */
     public function withSoftDeletes($softDeletesEnabled)
@@ -659,12 +693,11 @@ class Model
     public function usesSoftDeletes()
     {
         return $this->softDeletes &&
-               $this->blueprint->hasColumn($this->getDeletedAtField());
+            $this->blueprint->hasColumn($this->getDeletedAtField());
     }
 
     /**
-     * @param string $field
-     *
+     * @param  string  $field
      * @return $this
      */
     public function withDeletedAtField($field)
@@ -688,7 +721,7 @@ class Model
     public function hasCustomDeletedAtField()
     {
         return $this->usesSoftDeletes() &&
-               $this->getDeletedAtField() != $this->getDefaultDeletedAtField();
+            $this->getDeletedAtField() != $this->getDefaultDeletedAtField();
     }
 
     /**
@@ -707,7 +740,9 @@ class Model
         $traits = $this->config('use', []);
 
         if (! is_array($traits)) {
-            throw new \RuntimeException('Config use must be an array of valid traits to append to each model.');
+            throw new \RuntimeException(
+                'Config use must be an array of valid traits to append to each model.'
+            );
         }
 
         if ($this->usesSoftDeletes()) {
@@ -722,7 +757,7 @@ class Model
      */
     public function needsTableName()
     {
-        return false === $this->shouldQualifyTableName() ||
+        return $this->shouldQualifyTableName() === false ||
             $this->shouldRemoveTablePrefix() ||
             $this->blueprint->table() != Str::plural($this->getRecordName()) ||
             ! $this->shouldPluralizeTableName();
@@ -737,7 +772,7 @@ class Model
     }
 
     /**
-     * @param string $tablePrefix
+     * @param  string  $tablePrefix
      */
     public function withTablePrefix($tablePrefix)
     {
@@ -745,7 +780,7 @@ class Model
     }
 
     /**
-     * @param string $relationNameStrategy
+     * @param  string  $relationNameStrategy
      */
     public function withRelationNameStrategy($relationNameStrategy)
     {
@@ -753,11 +788,14 @@ class Model
     }
 
     /**
-     * @param string $table
+     * @param  string  $table
      */
     public function removeTablePrefix($table)
     {
-        if (($this->shouldRemoveTablePrefix()) && (substr($table, 0, strlen($this->tablePrefix)) == $this->tablePrefix)) {
+        if (
+            $this->shouldRemoveTablePrefix() &&
+            substr($table, 0, strlen($this->tablePrefix)) == $this->tablePrefix
+        ) {
             $table = substr($table, strlen($this->tablePrefix));
         }
 
@@ -765,7 +803,7 @@ class Model
     }
 
     /**
-     * @param bool $showConnection
+     * @param  bool  $showConnection
      */
     public function withConnection($showConnection)
     {
@@ -773,7 +811,7 @@ class Model
     }
 
     /**
-     * @param string $connection
+     * @param  string  $connection
      */
     public function withConnectionName($connection)
     {
@@ -802,7 +840,7 @@ class Model
     public function hasCustomPrimaryKey()
     {
         return count($this->primaryKeys->columns) == 1 &&
-               $this->getPrimaryKey() != $this->getDefaultPrimaryKeyField();
+            $this->getPrimaryKey() != $this->getDefaultPrimaryKeyField();
     }
 
     /**
@@ -815,6 +853,7 @@ class Model
 
     /**
      * @todo: Improve it
+     *
      * @return string
      */
     public function getPrimaryKey()
@@ -828,6 +867,7 @@ class Model
 
     /**
      * @return string
+     *
      * @todo: check
      */
     public function getPrimaryKeyType()
@@ -837,6 +877,7 @@ class Model
 
     /**
      * @todo: Check whether it is necessary
+     *
      * @return bool
      */
     public function hasCustomPrimaryKeyCast()
@@ -872,9 +913,6 @@ class Model
         return false;
     }
 
-    /**
-     * @param $perPage
-     */
     public function withPerPage($perPage)
     {
         $this->perPage = (int) $perPage;
@@ -905,8 +943,7 @@ class Model
     }
 
     /**
-     * @param string $format
-     *
+     * @param  string  $format
      * @return $this
      */
     public function withDateFormat($format)
@@ -1041,8 +1078,7 @@ class Model
     }
 
     /**
-     * @param string $name
-     *
+     * @param  string  $name
      * @return bool
      */
     public function hasProperty($name)
@@ -1075,8 +1111,7 @@ class Model
     }
 
     /**
-     * @param string $column
-     *
+     * @param  string  $column
      * @return bool
      */
     public function isHidden($column)
@@ -1084,7 +1119,9 @@ class Model
         $attributes = $this->config('hidden', []);
 
         if (! is_array($attributes)) {
-            throw new \RuntimeException('Config field [hidden] must be an array of attributes to hide from array or json.');
+            throw new \RuntimeException(
+                'Config field [hidden] must be an array of attributes to hide from array or json.'
+            );
         }
 
         foreach ($attributes as $pattern) {
@@ -1113,8 +1150,7 @@ class Model
     }
 
     /**
-     * @param string $column
-     *
+     * @param  string  $column
      * @return bool
      */
     public function isFillable($column)
@@ -1122,7 +1158,9 @@ class Model
         $guarded = $this->config('guarded', []);
 
         if (! is_array($guarded)) {
-            throw new \RuntimeException('Config field [guarded] must be an array of attributes to protect from mass assignment.');
+            throw new \RuntimeException(
+                'Config field [guarded] must be an array of attributes to protect from mass assignment.'
+            );
         }
 
         $protected = [
@@ -1169,8 +1207,6 @@ class Model
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $command
-     *
      * @return bool
      */
     public function isPrimaryKey(Fluent $command)
@@ -1185,8 +1221,6 @@ class Model
     }
 
     /**
-     * @param \Illuminate\Support\Fluent $command
-     *
      * @return bool
      */
     public function isUniqueKey(Fluent $command)
@@ -1240,9 +1274,8 @@ class Model
     }
 
     /**
-     * @param string $key
-     * @param mixed $default
-     *
+     * @param  string  $key
+     * @param  mixed  $default
      * @return mixed
      */
     public function config($key = null, $default = null)
@@ -1250,17 +1283,11 @@ class Model
         return $this->factory->config($this->getBlueprint(), $key, $default);
     }
 
-    /**
-     * @return bool
-     */
     public function fillableInBaseFiles(): bool
     {
         return $this->config('fillable_in_base_files', false);
     }
 
-    /**
-     * @return bool
-     */
     public function hiddenInBaseFiles(): bool
     {
         return $this->config('hidden_in_base_files', false);
