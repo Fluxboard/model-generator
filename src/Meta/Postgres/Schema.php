@@ -40,6 +40,11 @@ class Schema implements \Reliese\Meta\Schema
     protected $default_schema = null;
 
     /**
+     * @var mixed[]
+     */
+    protected $side_schemas = [];
+
+    /**
      * Mapper constructor.
      *
      * @param  string  $schema
@@ -71,6 +76,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function load()
     {
+        echo "Loading {$this->schema} \n";
         $tables = $this->fetchTables();
         foreach ($tables as $table) {
             $blueprint = new Blueprint(
@@ -131,7 +137,7 @@ class Schema implements \Reliese\Meta\Schema
             '
         SELECT child.attname, p.contype, p.conname,
             parent_class.relname as parent_table,
-            parent.attname as parent_attname
+            parent.attname as parent_attname,
             pc.nspname as parent_schema
         FROM pg_attribute child
             JOIN pg_class child_class ON child_class.oid = child.attrelid
@@ -141,9 +147,12 @@ class Schema implements \Reliese\Meta\Schema
                 AND parent.attrelid = p.confrelid
             LEFT JOIN pg_class parent_class on parent_class.oid = p.confrelid
             LEFT JOIN pg_namespace pc ON pc.oid = parent_class.relnamespace
+            LEFT JOIN pg_namespace nc ON nc.oid = child_class.relnamespace
         WHERE child_class.relkind = \'r\'::char
             AND child_class.relname = \''.
             $blueprint->table().
+            '\' AND nc.nspname = \''.
+            $this->default_schema.
             '\'
             AND child.attnum > 0
             AND contype IS NOT NULL
@@ -156,7 +165,9 @@ class Schema implements \Reliese\Meta\Schema
         $this->fillRelations($relations, $blueprint);
 
         $sql =
-            'SELECT * FROM pg_indexes WHERE tablename = \''.
+            'SELECT * FROM pg_indexes WHERE schemaname = \''.
+            $this->default_schema.
+            '\' AND tablename = \''.
             $blueprint->table().
             '\';';
         $indexes = $this->arraify($this->connection->select($sql));
@@ -239,6 +250,11 @@ class Schema implements \Reliese\Meta\Schema
                 $fk[$relName]['ref'][] = $row['parent_attname'];
                 $fk[$relName]['table'] = $row['parent_table'];
                 $fk[$relName]['schema'] = $row['parent_schema'];
+
+                if (! in_array($row['parent_schema'], $this->side_schemas) && $row['parent_schema'] != $this->default_schema) {
+                    $this->side_schemas[] = $row['parent_schema'];
+                }
+
             }
         }
 
@@ -299,6 +315,14 @@ class Schema implements \Reliese\Meta\Schema
     public function schema()
     {
         return $this->schema;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function side_schemas()
+    {
+        return $this->side_schemas;
     }
 
     /**

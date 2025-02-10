@@ -267,4 +267,12 @@ class Schema implements \Reliese\Meta\Schema
 
         return $references;
     }
+
+    /**
+     * @return string[]
+     */
+    public function side_schemas()
+    {
+        return [];
+    }
 }

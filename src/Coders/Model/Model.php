@@ -562,11 +562,13 @@ class Model
             return $overriddenName;
         }
 
+        $recordName = $this->getSchema().Str::ucfirst($this->getRecordName());
+
         if ($this->shouldLowerCaseTableName()) {
-            return Str::studly(Str::lower($this->getRecordName()));
+            return Str::studly(Str::lower($recordName));
         }
 
-        return Str::studly($this->getRecordName());
+        return Str::studly($recordName);
     }
 
     /**
@@ -757,10 +759,11 @@ class Model
      */
     public function needsTableName()
     {
-        return $this->shouldQualifyTableName() === false ||
-            $this->shouldRemoveTablePrefix() ||
-            $this->blueprint->table() != Str::plural($this->getRecordName()) ||
-            ! $this->shouldPluralizeTableName();
+        return true;
+        // $this->shouldQualifyTableName() === false ||
+        //     $this->shouldRemoveTablePrefix() ||
+        //     $this->blueprint->table() != Str::plural($this->getRecordName()) ||
+        //     ! $this->shouldPluralizeTableName();
     }
 
     /**

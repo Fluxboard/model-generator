@@ -26,6 +26,8 @@ class Factory
      */
     protected $schemas = [];
 
+    protected $processed_schemas = [];
+
     /**
      * @var \Illuminate\Filesystem\Filesystem
      */
@@ -108,6 +110,10 @@ class Factory
             $this->on();
         }
 
+        if (in_array($schema, $this->processed_schemas)) {
+            return;
+        }
+
         $mapper = $this->makeSchema($schema);
 
         foreach ($mapper->tables() as $blueprint) {
@@ -116,6 +122,14 @@ class Factory
                 $this->shouldNotExclude($blueprint)
             ) {
                 $this->create($mapper->schema(), $blueprint->table());
+            }
+        }
+
+        $this->processed_schemas[] = $schema;
+
+        foreach ($mapper->side_schemas() as $sub_schema) {
+            if (! in_array($sub_schema, $this->processed_schemas)) {
+                $this->map($sub_schema);
             }
         }
     }

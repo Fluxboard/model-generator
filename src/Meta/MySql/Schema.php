@@ -375,4 +375,12 @@ class Schema implements \Reliese\Meta\Schema
         $this->fillConstraints($blueprint);
         $this->tables[$table] = $blueprint;
     }
+
+    /**
+     * @return string[]
+     */
+    public function side_schemas()
+    {
+        return [];
+    }
 }

@@ -44,4 +44,11 @@ interface Schema
      * @return array
      */
     public function referencing(Blueprint $table);
+
+    /**
+     * @var mixed[]
+     *
+     * @return string[]
+     */
+    public function side_schemas();
 }
