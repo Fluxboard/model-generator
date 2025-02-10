@@ -1,11 +1,11 @@
 {
-    "name": "reliese/laravel",
+    "name": "fluxboard/model-generator",
     "description": "Reliese Components for Laravel Framework code generation.",
     "keywords": ["reliese", "laravel"],
     "homepage": "http://cristianllanos.com",
     "support": {
-        "issues": "https://github.com/reliese/laravel/issues",
-        "source": "https://github.com/reliese/laravel"
+        "issues": "https://github.com/fluxboard/model-generator/issues",
+        "source": "https://github.com/fluxboard/model-generator"
     },
     "license": "MIT",
     "authors": [
