@@ -16,7 +16,7 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * @var string
      */
-    protected $database_name;
+    protected $schema;
 
     /**
      * @var \Illuminate\Database\MySqlConnection
@@ -36,12 +36,12 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * Mapper constructor.
      *
-     * @param  string  $database_name
+     * @param  string  $schema
      * @param  \Illuminate\Database\MySqlConnection  $connection
      */
-    public function __construct($database_name, $connection)
+    public function __construct($schema, $connection)
     {
-        $this->database_name = $database_name;
+        $this->schema = $schema;
         $this->connection = $connection;
 
         $this->load();
@@ -62,11 +62,11 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function load()
     {
-        $tables = $this->fetchTables($this->database_name);
+        $tables = $this->fetchTables($this->schema);
         foreach ($tables as $table) {
             $this->loadTable($table);
         }
-        $views = $this->fetchViews($this->database_name);
+        $views = $this->fetchViews($this->schema);
         foreach ($views as $table) {
             $this->loadTable($table, true);
         }
@@ -297,7 +297,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     public function schema()
     {
-        return $this->database_name;
+        return $this->schema;
     }
 
     /**
@@ -325,7 +325,7 @@ class Schema implements \Reliese\Meta\Schema
     {
         if (! $this->has($table)) {
             throw new \InvalidArgumentException(
-                "Table [$table] does not belong to schema [{$this->database_name}]"
+                "Table [$table] does not belong to schema [{$this->schema}]"
             );
         }
 
@@ -367,7 +367,7 @@ class Schema implements \Reliese\Meta\Schema
     {
         $blueprint = new Blueprint(
             $this->connection->getName(),
-            $this->database_name,
+            $this->schema,
             $table,
             $isView
         );

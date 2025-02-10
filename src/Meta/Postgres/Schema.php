@@ -17,7 +17,7 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * @var string
      */
-    protected $database_name;
+    protected $schema;
 
     /**
      * @var \Illuminate\Database\PostgresConnection
@@ -42,18 +42,15 @@ class Schema implements \Reliese\Meta\Schema
     /**
      * Mapper constructor.
      *
-     * @param  string  $database_name
+     * @param  string  $schema
      * @param  \Illuminate\Database\PostgresConnection  $connection
      */
-    public function __construct($database_name, $connection)
+    public function __construct($schema, $connection)
     {
-        $this->default_schema = Config::get(
-            'database.connections.pgsql.schema'
+        $this->default_schema = $schema ?? Config::get(
+            'database.connections.pgsql.schema', 'public'
         );
-        if (! $this->default_schema) {
-            $this->default_schema = 'public';
-        }
-        $this->database_name = $database_name;
+        $this->schema = $schema;
         $this->connection = $connection;
 
         $this->load();
@@ -74,14 +71,11 @@ class Schema implements \Reliese\Meta\Schema
      */
     protected function load()
     {
-        // Note that "schema" refers to the database name,
-        // not a pgsql schema.
-        $this->connection->raw("\c ".$this->wrap($this->database_name));
-        $tables = $this->fetchTables($this->database_name);
+        $tables = $this->fetchTables();
         foreach ($tables as $table) {
             $blueprint = new Blueprint(
                 $this->connection->getName(),
-                $this->database_name,
+                $this->schema,
                 $table
             );
             $this->fillColumns($blueprint);
@@ -138,6 +132,7 @@ class Schema implements \Reliese\Meta\Schema
         SELECT child.attname, p.contype, p.conname,
             parent_class.relname as parent_table,
             parent.attname as parent_attname
+            pc.nspname as parent_schema
         FROM pg_attribute child
             JOIN pg_class child_class ON child_class.oid = child.attrelid
             LEFT JOIN pg_constraint p ON p.conrelid = child_class.oid
@@ -145,6 +140,7 @@ class Schema implements \Reliese\Meta\Schema
             LEFT JOIN pg_attribute parent on parent.attnum = ANY (p.confkey)
                 AND parent.attrelid = p.confrelid
             LEFT JOIN pg_class parent_class on parent_class.oid = p.confrelid
+            LEFT JOIN pg_namespace pc ON pc.oid = parent_class.relnamespace
         WHERE child_class.relkind = \'r\'::char
             AND child_class.relname = \''.
             $blueprint->table().
@@ -153,6 +149,7 @@ class Schema implements \Reliese\Meta\Schema
             AND contype IS NOT NULL
         ORDER BY child.attnum
         ;';
+
         $relations = $this->arraify($this->connection->select($sql));
 
         $this->fillPrimaryKey($relations, $blueprint);
@@ -241,6 +238,7 @@ class Schema implements \Reliese\Meta\Schema
                 $fk[$relName]['columns'][] = $row['attname'];
                 $fk[$relName]['ref'][] = $row['parent_attname'];
                 $fk[$relName]['table'] = $row['parent_table'];
+                $fk[$relName]['schema'] = $row['parent_schema'];
             }
         }
 
@@ -250,7 +248,7 @@ class Schema implements \Reliese\Meta\Schema
                 'index' => '',
                 'columns' => $row['columns'],
                 'references' => $row['ref'],
-                'on' => [$this->database_name, $row['table']],
+                'on' => [$row['schema'], $row['table']],
             ];
 
             $blueprint->withRelation(new Fluent($relation));
@@ -300,7 +298,7 @@ class Schema implements \Reliese\Meta\Schema
      */
     public function schema()
     {
-        return $this->database_name;
+        return $this->schema;
     }
 
     /**
@@ -328,7 +326,7 @@ class Schema implements \Reliese\Meta\Schema
     {
         if (! $this->has($table)) {
             throw new \InvalidArgumentException(
-                "Table [$table] does not belong to schema [{$this->database_name}]"
+                "Table [$table] does not belong to schema [{$this->schema}]"
             );
         }
 
