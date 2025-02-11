@@ -46,6 +46,7 @@ class Column implements \Reliese\Meta\Column
             'mediumtext',
             'longtext',
             'json',
+            'jsonb',
         ],
         'datetime' => [
             'timestamp with time zone',
@@ -82,7 +83,7 @@ class Column implements \Reliese\Meta\Column
             'double precision',
         ],
         'boolean' => ['boolean', 'bool', 'bit'],
-        'binary' => ['blob', 'longblob', 'jsonb'],
+        'binary' => ['blob', 'longblob'],
     ];
 
     /**
